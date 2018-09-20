@@ -37,6 +37,10 @@ class PowerEdit:
         return glob.glob(pathname, recursive=recursive)
 
     def find_replace(self, file_path, find_str, replace_str):
+        """
+        Replaces all occurance of `find_str` with `replace_str` in the file specified by `file_path`.
+        """
+
         print(f'file_path = {file_path}, find_str = {find_str}')
 
         # Read in the file
@@ -53,6 +57,8 @@ class PowerEdit:
         if not self.sim_run:
             with open(file_path, 'w') as file:
                 file.write(filedata)
+
+        return filedata
 
     def find_insert(self, file_path: str, find_str: str, insert_str: str) -> None:
         """
