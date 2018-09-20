@@ -50,4 +50,4 @@ def test_find_replace(init):
     results = power_edit.find_files(init['script_path'] + 'data/test1.txt')
     assert len(results) == 1
     result = power_edit.find_replace(results[0], 'hello', 'bonjour')
-    assert result == 'bonjour'
+    assert result == "bonjour\ngoodbye\nbonjour\ngoodbye"
