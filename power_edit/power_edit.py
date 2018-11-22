@@ -23,8 +23,6 @@ class PowerEdit:
         Replaces all occurance of `find_str` with `replace_str` in the file specified by `file_path`.
         """
 
-        print(f'file_path = {file_path}, find_str = {find_str}')
-
         # Read in the file
         with open(file_path, 'r') as file :
             filedata = file.read()
@@ -42,16 +40,20 @@ class PowerEdit:
             filedata = re.sub(regex, replace, filedata)
         elif callable(replace):
             regex = re.compile(find_str, regex_flags)
-            match = regex.search(filedata)
-            print(f'match = {match}')
-            print(f'match.start = {match.start()}')
-            print(f'match.end = {match.end()}')
-            group = match.group()
-            replacement_text = replace(group)
-            filedata = filedata[:match.start()] + replacement_text + filedata[match.end():]
+
+            while(True):
+                match = regex.search(filedata)
+
+                # Exit out of find/replace loop if we don't find anymore matches
+                if match is None:
+                    break
+
+                group = match.group()
+                replacement_text = replace(group)
+                filedata = filedata[:match.start()] + replacement_text + filedata[match.end():]
 
         if self.sim_run:
-            print(f'replaced filedata = {filedata}')
+            print(f'find_replace() ifnished. replaced filedata = {filedata}')
 
         # Write the file out again
         if not self.sim_run:

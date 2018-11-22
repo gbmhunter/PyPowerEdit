@@ -1,0 +1,5 @@
+[tag]abc
+def[/tag]
+123
+[tag]ghi
+jkl[/tag]

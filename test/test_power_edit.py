@@ -6,7 +6,6 @@ from power_edit import power_edit
 
 @pytest.fixture
 def init():
-    
     return {
         'power_edit': power_edit.PowerEdit(),
         'script_path': os.path.dirname(os.path.realpath(__file__)) + os.sep
@@ -54,7 +53,6 @@ def test_find_replace_regex_simple(init):
     power_edit = init['power_edit']
 
     def replace_fn(find_str):
-        print(f'replace_fn() called. find_str = {find_str}')
         return 'replace'
 
     results = power_edit.find_files(os.path.join(init['script_path'], 'data', 'regex', 'multiline.txt'))
@@ -62,14 +60,39 @@ def test_find_replace_regex_simple(init):
     result = power_edit.find_replace(results[0], 'se.*d', replace_fn, regex=True)
     assert result == "first\nreplace\nthird\nfourth\nfifth"
 
+def test_find_replace_regex_no_match(init):
+    power_edit = init['power_edit']
+
+    def replace_fn(find_str):
+        return 'replace'
+
+    results = power_edit.find_files(os.path.join(init['script_path'], 'data', 'regex', 'multiline.txt'))
+    assert len(results) == 1
+    result = power_edit.find_replace(results[0], 'no_match', replace_fn, regex=True)
+
+    # result should be the unchanged input
+    assert result == "first\nsecond\nthird\nfourth\nfifth"
+
 def test_find_replace_regex_multiline(init):
     power_edit = init['power_edit']
 
     def replace_fn(find_str):
-        print(f'replace_fn() called. find_str = {find_str}')
         return 'replace'
 
     results = power_edit.find_files(os.path.join(init['script_path'], 'data', 'regex', 'multiline.txt'))
     assert len(results) == 1
     result = power_edit.find_replace(results[0], 'sec.*ourth', replace_fn, regex=True, multiline=True)
     assert result == "first\nreplace\nfifth"
+
+def test_find_replace_regex_multiline_non_greedy(init):
+    power_edit = init['power_edit']
+
+    def replace_fn(find_str):
+        return 'replace'
+
+    results = power_edit.find_files(os.path.join(init['script_path'], 'data', 'regex', 'multiline2.txt'))
+    assert len(results) == 1
+
+    # Use a non-greedy match
+    result = power_edit.find_replace(results[0], '\[tag.*?tag\]', replace_fn, regex=True, multiline=True)
+    assert result == "replace\n123\nreplace"
