@@ -4,7 +4,7 @@ import fileinput
 import glob
 import os
 import re
-from typing import List, Optional
+from typing import Callable, List, Optional, Union
 
 class PowerEdit:
 
@@ -13,30 +13,12 @@ class PowerEdit:
         # print more info about changes to stdout
         self.sim_run: bool = True
 
-    # def find_files(self, base_dir: str, extension: Optional[str]=None) -> List:
-    #     """
-    #     Finds file matching specfic patterns.
-
-    #     Args:
-    #         base_dir (str): An absolute path to the base directory to begin searching to files from.
-    #     """
-
-    #     matched_files = list()
-    #     for root, dirs, files in os.walk(base_dir):
-    #         print(files)
-    #         for file in files:
-    #             if file.endswith(extension):
-    #                 matched_files.append(os.path.join(root, file))
-
-    #     if self.sim_run:
-    #         print(f'matched_files = {matched_files}')
-
-    #     return matched_files
-
     def find_files(self, pathname, recursive=False):
         return glob.glob(pathname, recursive=recursive)
 
-    def find_replace(self, file_path: str, find_str: str, replace_str: str, regex: bool=False, replace_fn=None):
+    def find_replace(self, file_path: str, find_str: str, replace: Union[str, Callable], 
+        regex: bool=False,
+        multiline: bool=False):
         """
         Replaces all occurance of `find_str` with `replace_str` in the file specified by `file_path`.
         """
@@ -47,20 +29,25 @@ class PowerEdit:
         with open(file_path, 'r') as file :
             filedata = file.read()
 
+        if multiline:
+            regex_flags = re.MULTILINE|re.DOTALL
+        else:
+            regex_flags = 0
+
         # Replace the target string
         if not regex:
-            filedata = filedata.replace(find_str, replace_str)
-        elif replace_fn is None:
-            regex = re.compile(find_str, re.MULTILINE|re.DOTALL)
-            filedata = re.sub(regex, replace_str, filedata)
-        else:
-            regex = re.compile(find_str, re.MULTILINE|re.DOTALL)
+            filedata = filedata.replace(find_str, replace)
+        elif isinstance(replace, str):
+            regex = re.compile(find_str, regex_flags)
+            filedata = re.sub(regex, replace, filedata)
+        elif callable(replace):
+            regex = re.compile(find_str, regex_flags)
             match = regex.search(filedata)
             print(f'match = {match}')
             print(f'match.start = {match.start()}')
             print(f'match.end = {match.end()}')
             group = match.group()
-            replacement_text = replace_fn(group)
+            replacement_text = replace(group)
             filedata = filedata[:match.start()] + replacement_text + filedata[match.end():]
 
         if self.sim_run:
