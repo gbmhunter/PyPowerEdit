@@ -36,7 +36,7 @@ class PowerEdit:
     def find_files(self, pathname, recursive=False):
         return glob.glob(pathname, recursive=recursive)
 
-    def find_replace(self, file_path, find_str, replace_str):
+    def find_replace(self, file_path: str, find_str: str, replace_str: str, regex: bool=False, replace_fn=None):
         """
         Replaces all occurance of `find_str` with `replace_str` in the file specified by `file_path`.
         """
@@ -48,10 +48,23 @@ class PowerEdit:
             filedata = file.read()
 
         # Replace the target string
-        filedata = filedata.replace(find_str, replace_str)
+        if not regex:
+            filedata = filedata.replace(find_str, replace_str)
+        elif replace_fn is None:
+            regex = re.compile(find_str, re.MULTILINE|re.DOTALL)
+            filedata = re.sub(regex, replace_str, filedata)
+        else:
+            regex = re.compile(find_str, re.MULTILINE|re.DOTALL)
+            match = regex.search(filedata)
+            print(f'match = {match}')
+            print(f'match.start = {match.start()}')
+            print(f'match.end = {match.end()}')
+            group = match.group()
+            replacement_text = replace_fn(group)
+            filedata = filedata[:match.start()] + replacement_text + filedata[match.end():]
 
         if self.sim_run:
-            print(f'filedata = {filedata}')
+            print(f'replaced filedata = {filedata}')
 
         # Write the file out again
         if not self.sim_run:
