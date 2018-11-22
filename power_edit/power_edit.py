@@ -13,14 +13,54 @@ class PowerEdit:
         # print more info about changes to stdout
         self.sim_run: bool = True
 
-    def find_files(self, pathname, recursive=False):
+    def find_files(self, pathname: str, recursive: bool=False) -> List[str]:
         return glob.glob(pathname, recursive=recursive)
 
-    def find_replace(self, file_path: str, find_str: str, replace: Union[str, Callable], 
-        regex: bool=False,
-        multiline: bool=False):
+    def find_replace(self, file_path: str, find_str: str, replace_str: str) -> str:
         """
-        Replaces all occurance of `find_str` with `replace_str` in the file specified by `file_path`.
+        Basic find/replace function that does not use regex. Will write changes to the file
+        if `self.sim_run=True`.
+
+        Args:
+            file_path: Absolute path to the file you wish to perform find/replace on.
+            find_str: The string you wish to search for (not regex).
+            replace_str: The string you wish the found text to be replaced with.
+        Returns:
+            The data that is written to the file after all find/replace operations have occurred.
+        """
+
+        # Read in the file
+        with open(file_path, 'r') as file :
+            filedata = file.read()
+
+        filedata = filedata.replace(find_str, replace_str)
+
+        if self.sim_run:
+            print(f'find_replace() finished. replaced filedata = {filedata}')
+
+        # Write the file out again
+        if not self.sim_run:
+            with open(file_path, 'w') as file:
+                file.write(filedata)
+
+        return filedata
+
+    def find_replace_regex(
+        self, file_path: str, regex_str: str, replace: Union[str, Callable], multiline: bool=False) -> str:
+        """
+        Advanced find/replace function that uses regex to find matching text.
+
+        Args:
+            file_path: Absolute path to the file you wish to perform find/replace on.
+            regex_str: The regex pattern (as a string) that you want to match against.
+            replace: If replace is a string, the matched pattern will be replaced directly with this
+                string. If replace is a function, the function will be called, passing in the 
+                found text as the first and only parameter. The found text will be replaced with 
+                whatever the function returns.
+            multiline: If True, matching will be performed with the re.MULTILINE and re.DOTALL flags
+                enabled.
+        Returns:
+            The data that is written to the file after all find/replace operations have occurred.
         """
 
         # Read in the file
@@ -33,13 +73,11 @@ class PowerEdit:
             regex_flags = 0
 
         # Replace the target string
-        if not regex:
-            filedata = filedata.replace(find_str, replace)
-        elif isinstance(replace, str):
-            regex = re.compile(find_str, regex_flags)
+        if isinstance(replace, str):
+            regex = re.compile(regex_str, regex_flags)
             filedata = re.sub(regex, replace, filedata)
         elif callable(replace):
-            regex = re.compile(find_str, regex_flags)
+            regex = re.compile(regex_str, regex_flags)
 
             while(True):
                 match = regex.search(filedata)
@@ -51,6 +89,8 @@ class PowerEdit:
                 group = match.group()
                 replacement_text = replace(group)
                 filedata = filedata[:match.start()] + replacement_text + filedata[match.end():]
+        else:
+            raise RuntimeError(f'replace must be either a string or a callable object. replace = {replace}.')
 
         if self.sim_run:
             print(f'find_replace() ifnished. replaced filedata = {filedata}')
@@ -101,3 +141,5 @@ class PowerEdit:
         else:
             with open(file_path, 'w') as file:
                 file.write(filedata)
+
+        
