@@ -1,9 +1,10 @@
 {
-    "python.pythonPath": "/anaconda3/envs/default/bin/python",
+    "python.pythonPath": "C:\\Users\\gbmhu\\AppData\\Local\\Programs\\Python\\Python37\\python.exe",
     "python.unitTest.pyTestArgs": [
         "."
     ],
     "python.unitTest.unittestEnabled": false,
     "python.unitTest.nosetestsEnabled": false,
-    "python.unitTest.pyTestEnabled": true
+    "python.unitTest.pyTestEnabled": true,
+    "python.linting.enabled": false
 }

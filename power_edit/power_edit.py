@@ -88,6 +88,8 @@ class PowerEdit:
 
                 group = match.group()
                 replacement_text = replace(group)
+                if not isinstance(replacement_text, str):
+                    raise ValueError('Returned object from replace function must be a string.')
                 filedata = filedata[:match.start()] + replacement_text + filedata[match.end():]
         else:
             raise RuntimeError(f'replace must be either a string or a callable object. replace = {replace}.')
