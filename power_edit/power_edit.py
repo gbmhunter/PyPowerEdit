@@ -144,4 +144,16 @@ class PowerEdit:
             with open(file_path, 'w') as file:
                 file.write(filedata)
 
+    @staticmethod
+    def strict_find(string, find, start_pos):
+        index = string.find(find, start_pos)
+        if index == -1:
+            raise RuntimeError(f'The text {find} was not found in {string}.')
+        return index
+
+    @staticmethod
+    def find_nth_match(string, pattern, n):
+        curr_pos = 0
+        for i in range(n):
+            string.find(pattern, n)
         

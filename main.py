@@ -8,7 +8,7 @@ def strict_find(string, find, start_pos):
         raise RuntimeError(f'The text {find} was not found in {string}.')
     return index
 
-def replace_fn(find_str: str) -> str:
+def replace_fn_caption_tag(find_str: str) -> str:
     # print(f'find_str = {find_str}')
 
     # WIDTH
@@ -49,12 +49,20 @@ def replace_fn(find_str: str) -> str:
 
     return template
 
+def replace_fn_no_caption_tag(find_str: str) -> str:
+    print(find_str)
+    return ''
+
 power_edit = power_edit.PowerEdit()
-results = power_edit.find_files('C:\\Users\\gbmhu\\code\\Hugo\\quickstart\\content\\' + '**/*.md', recursive=True)
+results = power_edit.find_files('/Users/ghunter/code/HugoTest/content/' + '**/*.md', recursive=True)
 # print(results[0])
 
-for i in range(len(results)):
+for i in range(1):
     print(f'Processing file {results[i]}')
-    power_edit.find_replace_regex(results[i], '\[caption.*?\[/caption\]', replace_fn, multiline=True)
+    # power_edit.find_replace_regex(results[i], '\[caption.*?\[/caption\]', replace_fn_caption_tag, multiline=True)
+
+    pattern = '\[\!\[.*?\]\(.*?\)\]\(.*?\)'
+    pattern = '\[\!\[.*?\]\(.*?\).*?\]\(.*?\)'
+    power_edit.find_replace_regex(results[i], pattern, replace_fn_no_caption_tag, multiline=True)
 
 print(f'num_replacements = {num_replacements}')
