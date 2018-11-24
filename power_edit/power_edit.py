@@ -64,7 +64,7 @@ class PowerEdit:
         """
 
         # Read in the file
-        with open(file_path, 'r') as file :
+        with open(file_path, 'r', encoding='utf-8') as file :
             filedata = file.read()
 
         if multiline:
