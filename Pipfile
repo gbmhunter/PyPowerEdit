@@ -8,6 +8,8 @@ verify_ssl = true
 [packages]
 pytest = "==3.5.*"
 pytest-mock = "==1.10.0"
+requests = "*"
+advancedhtmlparser = "*"
 
 [requires]
 python_version = "3.6"

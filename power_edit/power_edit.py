@@ -4,6 +4,7 @@ import fileinput
 import glob
 import os
 import re
+from inspect import signature
 from typing import Callable, List, Optional, Union
 
 class PowerEdit:
@@ -12,6 +13,8 @@ class PowerEdit:
         # Set this to True to perform a simulation run, which will not modify anything, and will
         # print more info about changes to stdout
         self.sim_run: bool = True
+
+        self._encoding = 'utf-8'
 
     def find_files(self, pathname: str, recursive: bool=False) -> List[str]:
         return glob.glob(pathname, recursive=recursive)
@@ -30,7 +33,7 @@ class PowerEdit:
         """
 
         # Read in the file
-        with open(file_path, 'r') as file :
+        with open(file_path, 'r', encoding=self._encoding) as file :
             filedata = file.read()
 
         filedata = filedata.replace(find_str, replace_str)
@@ -40,7 +43,7 @@ class PowerEdit:
 
         # Write the file out again
         if not self.sim_run:
-            with open(file_path, 'w') as file:
+            with open(file_path, 'w', encoding=self._encoding) as file:
                 file.write(filedata)
 
         return filedata
@@ -87,7 +90,14 @@ class PowerEdit:
                     break
 
                 group = match.group()
-                replacement_text = replace(group)
+                sig = signature(replace)
+                if len(sig.parameters) == 1:
+                    replacement_text = replace(group)
+                elif len(sig.parameters) == 2:
+                    replacement_text = replace(group, file_path)
+                else:
+                    raise ValueError('Provided function does not have the correct number of parameters.')
+
                 if not isinstance(replacement_text, str):
                     raise ValueError('Returned object from replace function must be a string.')
                 filedata = filedata[:match.start()] + replacement_text + filedata[match.end():]
@@ -99,7 +109,7 @@ class PowerEdit:
 
         # Write the file out again
         if not self.sim_run:
-            with open(file_path, 'w') as file:
+            with open(file_path, 'w', encoding=self._encoding) as file:
                 file.write(filedata)
 
         return filedata
@@ -120,7 +130,7 @@ class PowerEdit:
         Returns:
             None
         """
-        with open(file_path, 'r') as file :
+        with open(file_path, 'r', encoding=self._encoding) as file :
             filedata = file.read()
 
 
@@ -141,7 +151,7 @@ class PowerEdit:
         if self.sim_run:
             print(f'find_insert() finished. filedata = {filedata}')
         else:
-            with open(file_path, 'w') as file:
+            with open(file_path, 'w', encoding=self._encoding) as file:
                 file.write(filedata)
 
     @staticmethod
@@ -153,7 +163,8 @@ class PowerEdit:
 
     @staticmethod
     def find_nth_match(string, pattern, n):
-        curr_pos = 0
+        curr_pos = -1
         for i in range(n):
-            string.find(pattern, n)
+            curr_pos = PowerEdit.strict_find(string, pattern, curr_pos + 1)
+        return curr_pos
         
